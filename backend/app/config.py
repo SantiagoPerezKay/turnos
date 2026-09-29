@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     whatsapp_token: str = ""            # token de System User (permanente)
     whatsapp_verify_token: str = ""     # string que inventás vos para verificar el webhook
     whatsapp_app_secret: str = ""       # App Secret de la app de Meta (firma de webhooks)
+    whatsapp_waba_id: str = ""          # Business Account ID del número de prueba
+    whatsapp_numero: str = ""           # número de prueba, formato E.164 sin "+"
 
     # Claude
     anthropic_api_key: str = ""
