@@ -1,0 +1,31 @@
+[project]
+name = "agendador-turnos"
+version = "0.1.0"
+description = "Agendador de turnos por WhatsApp para negocios y consultorios"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "asyncpg>=0.30",
+    "alembic>=1.13",
+    "pydantic-settings>=2.4",
+    "anthropic>=1.9",
+    "httpx2>=2.0",
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+]
+
+# La app corre desde el código fuente; pip solo instala las dependencias.
+[tool.setuptools]
+packages = []
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

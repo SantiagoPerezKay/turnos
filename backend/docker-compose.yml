@@ -1,0 +1,25 @@
+# Solo para desarrollo local. En producción (Easypanel) Postgres y la app son servicios separados.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: agendador
+      POSTGRES_PASSWORD: agendador
+      POSTGRES_DB: agendador
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://agendador:agendador@db:5432/agendador
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
