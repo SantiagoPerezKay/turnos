@@ -14,6 +14,7 @@ from app.agent import runner, tools
 from app.config import get_settings
 from app.db import SessionLocal
 from app.models import Cliente, Conversacion, MensajeProcesado, Negocio
+from app.services import booking
 from app.services.whatsapp import WhatsAppClient
 
 log = logging.getLogger(__name__)
@@ -45,16 +46,6 @@ async def _ya_procesado(session: AsyncSession, wa_message_id: str) -> bool:
     return result.scalar() is None
 
 
-async def _obtener_cliente(session: AsyncSession, negocio: Negocio, telefono: str) -> Cliente:
-    await session.execute(
-        insert(Cliente).values(negocio_id=negocio.id, telefono=telefono).on_conflict_do_nothing()
-    )
-    await session.commit()
-    return await session.scalar(
-        select(Cliente).where(Cliente.negocio_id == negocio.id, Cliente.telefono == telefono)
-    )
-
-
 async def _conversacion_activa(session: AsyncSession, cliente: Cliente) -> Conversacion:
     s = get_settings()
     conv = await session.scalar(
@@ -78,7 +69,7 @@ async def _conversacion_activa(session: AsyncSession, cliente: Cliente) -> Conve
 
 async def generar_respuesta(session: AsyncSession, negocio: Negocio, telefono: str, texto: str) -> str:
     """Núcleo reutilizable (webhook y endpoint de simulación)."""
-    cliente = await _obtener_cliente(session, negocio, telefono)
+    cliente = await booking.obtener_cliente(session, negocio, telefono)
     lock = _locks.setdefault(cliente.id, asyncio.Lock())
     async with lock:
         conversacion = await _conversacion_activa(session, cliente)

@@ -29,6 +29,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import Base
 
 ESTADOS_TURNO = ("confirmado", "cancelado", "asistio", "ausente")
+ROLES = ("admin", "negocio")
 
 profesional_servicio = Table(
     "profesional_servicio",
@@ -187,3 +188,22 @@ class MensajeProcesado(Base):
 
     wa_message_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     recibido: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Usuario(Base):
+    """Acceso al panel. rol "admin" ve todos los negocios; rol "negocio" solo el suyo."""
+
+    __tablename__ = "usuarios"
+    __table_args__ = (
+        CheckConstraint(f"rol IN {ROLES}", name="rol_valido"),
+        CheckConstraint("rol = 'admin' OR negocio_id IS NOT NULL", name="usuario_negocio_requerido"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(254), unique=True)
+    nombre: Mapped[str] = mapped_column(String(200))
+    password_hash: Mapped[str] = mapped_column(String(300))
+    rol: Mapped[str] = mapped_column(String(20), default="negocio")
+    negocio_id: Mapped[int | None] = mapped_column(ForeignKey("negocios.id", ondelete="CASCADE"), index=True)
+    activo: Mapped[bool] = mapped_column(Boolean, default=True)
+    creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://agendador:agendador@localhost:5432/agendador"
 
     # Panel / API de administración
-    admin_api_key: str = "cambiar-esto"
+    admin_api_key: str = "cambiar-esto"   # acceso total para scripts (header X-API-Key)
+    jwt_secret: str = "cambiar-esto-tambien"
+    jwt_horas: int = 12
+    cors_origins: str = "http://localhost:5173"  # separados por coma
 
     # WhatsApp Cloud API (Meta)
     whatsapp_api_version: str = "v24.0"

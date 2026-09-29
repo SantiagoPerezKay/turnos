@@ -140,7 +140,9 @@ class TurnoOut(_Out):
     estado: str
     notas: str | None
     profesional_id: int
+    profesional_nombre: str
     servicio_id: int
+    servicio_nombre: str
     cliente_id: int
     cliente_nombre: str | None
     cliente_telefono: str
@@ -148,6 +150,25 @@ class TurnoOut(_Out):
 
 class TurnoActualizar(BaseModel):
     estado: str = Field(pattern="^(confirmado|cancelado|asistio|ausente)$")
+
+
+class TurnoCrear(BaseModel):
+    """Turno cargado a mano desde el panel (p. ej. pedido por teléfono)."""
+
+    servicio_id: int
+    profesional_id: int
+    inicio: datetime
+    cliente_telefono: str = Field(min_length=6, max_length=32)
+    cliente_nombre: str = Field(min_length=1, max_length=200)
+    notas: str | None = None
+
+    @field_validator("cliente_telefono")
+    @classmethod
+    def _solo_digitos(cls, v: str) -> str:
+        digitos = "".join(c for c in v if c.isdigit())
+        if len(digitos) < 6:
+            raise ValueError("Teléfono inválido")
+        return digitos
 
 
 class SlotOut(BaseModel):
@@ -163,6 +184,32 @@ class SimularIn(BaseModel):
     texto: str
 
 
+class SimularReiniciar(BaseModel):
+    telefono: str = "5491100000000"
+
+
 class SimularOut(BaseModel):
     respuesta: str
 
+
+
+# --- Usuarios del panel ---
+class UsuarioCrear(BaseModel):
+    email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    nombre: str = Field(min_length=1, max_length=200)
+    password: str = Field(min_length=8)
+
+
+class UsuarioActualizar(BaseModel):
+    nombre: str | None = Field(None, min_length=1, max_length=200)
+    password: str | None = Field(None, min_length=8)
+    activo: bool | None = None
+
+
+class UsuarioOut(_Out):
+    id: int
+    email: str
+    nombre: str
+    rol: str
+    negocio_id: int | None
+    activo: bool

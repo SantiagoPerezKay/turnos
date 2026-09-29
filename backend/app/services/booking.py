@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -14,6 +15,16 @@ from app.services.availability import slot_disponible
 
 class ReservaError(Exception):
     """Error de negocio con un mensaje apto para mostrarle al cliente."""
+
+
+async def obtener_cliente(session: AsyncSession, negocio: Negocio, telefono: str) -> Cliente:
+    await session.execute(
+        insert(Cliente).values(negocio_id=negocio.id, telefono=telefono).on_conflict_do_nothing()
+    )
+    await session.commit()
+    return await session.scalar(
+        select(Cliente).where(Cliente.negocio_id == negocio.id, Cliente.telefono == telefono)
+    )
 
 
 async def reservar(

@@ -17,7 +17,8 @@ app/
   config.py            variables de entorno
   models.py            tablas (negocios, profesionales, servicios, horarios, bloqueos, clientes, turnos…)
   api/webhook.py       verificación y recepción de mensajes de Meta
-  api/admin.py         API para el panel (X-API-Key) + simulador del bot
+  api/auth.py          login del panel (JWT)
+  api/admin.py         API del panel, con permisos por negocio + simulador del bot
   agent/               prompt, herramientas y loop de Claude
   services/
     availability.py    cálculo de horarios libres
@@ -26,8 +27,12 @@ app/
     whatsapp.py        cliente de la Graph API
     reminders.py       recordatorios con plantilla
 alembic/               migraciones (se aplican solas al arrancar el contenedor)
-scripts/seed_demo.py   consultorio de ejemplo
+scripts/seed_demo.py   consultorio y usuarios de ejemplo (solo desarrollo)
+scripts/crear_admin.py crea el primer usuario administrador
 ```
+
+**Accesos:** los usuarios del panel entran con email y contraseña (JWT). El rol `admin` ve todos los
+negocios; el rol `negocio` solo el suyo. La `X-API-Key` da acceso total para scripts.
 
 **Reservas sin superposición:** la tabla `turnos` tiene una restricción `EXCLUDE USING gist`.
 Aunque dos personas confirmen el mismo horario a la vez, Postgres acepta solo una.
@@ -66,6 +71,8 @@ Tests: `pytest`
    - Domains: un dominio con HTTPS (p. ej. `api.tudominio.com`) → puerto **8000**.
    - Una sola réplica.
 3. Verificar: `https://api.tudominio.com/health` → `{"ok": true}`.
+4. Crear el primer administrador desde la consola del servicio en Easypanel:
+   `python -m scripts.crear_admin tu@email.com "Tu Nombre"`
 
 ## Configurar Meta (WhatsApp Cloud API)
 
